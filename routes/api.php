@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\PedidosController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -32,6 +33,10 @@ Route::delete('/productos/{id_producto}',[ProductoController::class,'destroy']);
 
 //=========================================================================================
 
-//================================ CATEGORIAS =============================================
+//================================= PEDIDOS ===============================================
+
+Route::get('/pedidos', [PedidosController::class, 'index']);
+
+Route::get('/pedidos/usuario/{id_usuario}', [PedidosController::class, 'getOrderByUser']);
 
 //=========================================================================================

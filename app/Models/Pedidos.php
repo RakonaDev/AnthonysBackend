@@ -11,6 +11,8 @@ class Pedidos extends Model
 
   protected $table = 'pedidos';
 
+  protected $primaryKey = 'id_pedido';
+
   protected $fillable = [
     'id_usuario',
     'total',
@@ -21,4 +23,8 @@ class Pedidos extends Model
   protected $guarded = [
 
   ];
+
+  public function productos() {
+    return $this->belongsTo(Producto::class);
+  }
 }
