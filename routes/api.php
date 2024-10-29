@@ -36,4 +36,3 @@ Route::patch('/productos/{id_producto}', [ProductoController::class,'edit']);
 Route::delete('/productos/{id}', function () {
   return 'Eliminando Producto por id';
 });
-
