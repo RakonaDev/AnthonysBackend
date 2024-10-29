@@ -32,5 +32,4 @@ Route::put('/productos/{id_producto}', [ProductoController::class,'update']);
 
 Route::patch('/productos/{id_producto}', [ProductoController::class,'edit']);
 
-
 Route::delete('/productos/{id_producto}',[ProductoController::class,'destroy']);
