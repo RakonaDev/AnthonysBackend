@@ -17,7 +17,7 @@ return new class extends Migration
   {
     Schema::create('pedidos', function (Blueprint $table) {
       $table->id('id_pedido');
-      $table->foreignId('id_usuario')->constrained('producto')->onDelete('cascade');
+      $table->foreignId('id_usuario')->constrained('users', 'id_usuario')->onDelete('cascade');
       $table->double('total');
       $table->string('direccion');
       $table->string('estado');

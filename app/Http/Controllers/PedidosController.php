@@ -217,7 +217,7 @@ class PedidosController extends Controller
       return response()->json($reponse, 404);
     }
 
-    $pedidos = Pedidos::with('users')->where('id_usuario', $id_usuario)->get();
+    $pedidos = Pedidos::with('users')->where('id_usuario','=' ,$id_usuario)->get();
 
     if($pedidos->isEmpty()){
       $reponse = [

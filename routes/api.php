@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\PedidosController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -40,3 +41,14 @@ Route::get('/pedidos', [PedidosController::class, 'index']);
 Route::get('/pedidos/usuario/{id_usuario}', [PedidosController::class, 'getOrderByUser']);
 
 //=========================================================================================
+
+//================================= AUTHENTICATION ========================================
+
+Route::post('/register', [AuthController::class, 'register']);
+
+Route::post('/login', [AuthController::class, 'login']);
+
+Route::middleware('auth:api')->group(function () {
+  Route::post('/logout', [AuthController::class, 'logout']);
+  Route::get('/me', [AuthController::class, 'me']);
+});
