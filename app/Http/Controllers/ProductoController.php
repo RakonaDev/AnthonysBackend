@@ -16,6 +16,7 @@ class ProductoController extends Controller
     if($productos->isEmpty()){
       $reponse = [
         "mensaje" => "No se han encontrado productos",
+        "productos" => $productos,
         "status" => 200
       ];
       return response()->json($reponse, 200);
@@ -25,7 +26,7 @@ class ProductoController extends Controller
       "productos" => $productos,
       "status" => 200
     ];
-    return response()->json($productos , 200);
+    return response()->json($response , 200);
   }
 
   // Guarda el producto a la base de datos
@@ -75,11 +76,12 @@ class ProductoController extends Controller
 
   // Busca producto por ID
   public function show($id_producto) {
-    $productos = Producto::find($id_producto);
+    $producto = Producto::find($id_producto);
 
-    if($productos == null){
+    if($producto == null){
       $reponse = [
         'mensaje' => 'No se ha encontrado el producto',
+        'producto' => $producto,
         'status' => 404
       ];
 
@@ -87,11 +89,11 @@ class ProductoController extends Controller
     }
 
     $response = [
-      'producto' => $productos,
+      'producto' => $producto,
       'status'=> 200
     ];
 
-    return response()->json($productos , 200);
+    return response()->json($response, 200);
   }
 
   // Editar uno o más parametros del producto seleccionado

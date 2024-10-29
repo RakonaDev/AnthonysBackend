@@ -16,11 +16,7 @@ use Illuminate\Support\Facades\Route;
 
 use App\Http\Controllers\ProductoController;
 
-/*
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user();
-});
-*/
+//================================ PRODUCTOS =============================================
 
 Route::get('/productos', [ProductoController::class, 'index']);
 
@@ -33,3 +29,9 @@ Route::put('/productos/{id_producto}', [ProductoController::class,'update']);
 Route::patch('/productos/{id_producto}', [ProductoController::class,'edit']);
 
 Route::delete('/productos/{id_producto}',[ProductoController::class,'destroy']);
+
+//=========================================================================================
+
+//================================ CATEGORIAS =============================================
+
+//=========================================================================================
