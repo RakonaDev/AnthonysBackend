@@ -6,6 +6,7 @@ use App\Models\Pedidos;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+use Tymon\JWTAuth\Facades\JWTAuth;
 
 class PedidosController extends Controller
 {
@@ -207,6 +208,7 @@ class PedidosController extends Controller
 
   public function getOrderByUser ($id_usuario) {
     $usuario = User::find($id_usuario);
+    $usuarioAuth = JWTAuth::parseToken()->authenticate();
 
     if($usuario == null){
       $reponse = [
@@ -223,6 +225,7 @@ class PedidosController extends Controller
       $reponse = [
         'mensaje' => 'No hay pedidos',
         'pedidos' => $pedidos,
+        'usuario' => $usuarioAuth,
         'status' => 200
       ];
       return response()->json($reponse, 200);

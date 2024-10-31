@@ -38,7 +38,9 @@ Route::delete('/productos/{id_producto}',[ProductoController::class,'destroy']);
 
 Route::get('/pedidos', [PedidosController::class, 'index']);
 
-Route::get('/pedidos/usuario/{id_usuario}', [PedidosController::class, 'getOrderByUser']);
+Route::middleware('auth:api')->group(function () {
+  Route::get('/pedidos/usuario/{id_usuario}', [PedidosController::class, 'getOrderByUser']);
+});
 
 //=========================================================================================
 

@@ -34,10 +34,14 @@ class AuthController extends Controller
     $user = User::create([
       'name' => $request->name,
       'email' => $request->email,
-      'password' => Hash::make($request->password)
+      'password' => Hash::make($request->password),
+      'role' => 'user'
     ]);
 
     $token = JWTAuth::fromUser($user);
+
+    $user->remember_token = $token;
+    $user->save();
 
     $reponse = [
       'mensaje' => 'Usuario Creado Correctamente',
@@ -59,6 +63,7 @@ class AuthController extends Controller
       ];
       return response()->json($reponse, 401);
     }
+
     $reponse = [
       'user' => auth()->user(),
       'token' => $token
