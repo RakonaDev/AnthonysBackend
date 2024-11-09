@@ -15,6 +15,7 @@ use Illuminate\Support\Facades\Route;
 */
 
 use App\Http\Controllers\ProductoController;
+use App\Http\Controllers\CategoriaController;
 
 /*
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
@@ -32,4 +33,21 @@ Route::put('/productos/{id_producto}', [ProductoController::class,'update']);
 
 Route::patch('/productos/{id_producto}', [ProductoController::class,'edit']);
 
-Route::delete('/productos/{id_producto}',[ProductoController::class,'destroy']);
+Route::delete('/productos/{id_producto}', [ProductoController::class, 'destroy']);
+
+
+
+Route::prefix('categorias')->group(function () {
+
+    Route::get('/', [CategoriaController::class, 'index']);
+
+    Route::get('/{id_categoria}', [CategoriaController::class, 'show']);
+
+    Route::post('/', [CategoriaController::class, 'store']);
+
+    Route::put('/{id_categoria}', [CategoriaController::class, 'update']);
+
+    Route::patch('/{id_categoria}', [CategoriaController::class, 'edit']);
+
+    Route::delete('/{id_categoria}', [CategoriaController::class, 'destroy']);
+});
