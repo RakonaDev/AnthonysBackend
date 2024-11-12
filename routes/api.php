@@ -17,6 +17,7 @@ use Illuminate\Support\Facades\Route;
 */
 
 use App\Http\Controllers\ProductoController;
+use App\Http\Controllers\CategoriaController;
 
 //================================ PRODUCTOS =============================================
 
@@ -38,9 +39,7 @@ Route::middleware('auth:admin')->group(function () {
 
 });
 
-//=========================================================================================
 
-//================================= PEDIDOS ===============================================
 
 Route::middleware('auth:admin')->group(function () {
   Route::get('/pedidos', [PedidosController::class, 'index']);
@@ -50,13 +49,13 @@ Route::middleware('auth:api')->group(function () {
   Route::get('/pedidos/usuario', [PedidosController::class, 'getOrderByUser']);
 });
 
-//=========================================================================================
+    Route::get('/{id_categoria}', [CategoriaController::class, 'show']);
 
-//================================= AUTHENTICATION ========================================
+    Route::post('/', [CategoriaController::class, 'store']);
 
-Route::post('/register', [AuthController::class, 'register']);
+    Route::put('/{id_categoria}', [CategoriaController::class, 'update']);
 
-Route::post('/login', [AuthController::class, 'login']);
+    Route::patch('/{id_categoria}', [CategoriaController::class, 'edit']);
 
 Route::middleware('auth:api')->group(function () {
   Route::post('/logout', [AuthController::class, 'logout']);
