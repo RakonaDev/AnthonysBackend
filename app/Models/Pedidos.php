@@ -24,6 +24,11 @@ class Pedidos extends Model
 
   ];
 
+  public function detalle(){
+    return $this->hasMany(DetallePedidos::class, 'id_pedido');
+  }
+
+  
   public function productos() {
     return $this->belongsTo(Producto::class);
   }

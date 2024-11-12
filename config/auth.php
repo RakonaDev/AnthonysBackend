@@ -43,6 +43,10 @@ return [
     'api' => [
       'driver' => 'jwt',
       'provider' => 'users'
+    ],
+    'admin' => [
+      'driver' => 'jwt',
+      'provider' => 'admin'
     ]
   ],
 
@@ -68,6 +72,10 @@ return [
       'driver' => 'eloquent',
       'model' => App\Models\User::class,
     ],
+    'admin' => [
+      'driver' => 'eloquent',
+      'model' => App\Models\Admin::class
+    ]
 
     // 'users' => [
     //     'driver' => 'database',
@@ -97,6 +105,12 @@ return [
       'expire' => 60,
       'throttle' => 60,
     ],
+    'admin' => [
+      'provider' => 'admin',
+      'table' => 'password_resets',
+      'expire' => 60,
+      'throttle' => 60
+    ] 
   ],
 
   /*

@@ -11,6 +11,8 @@ class DetallePedidos extends Model
 
   protected $table = 'detalle_pedido';
 
+  protected $primaryKey = 'id_detalle';
+
   protected $fillable = [
     'id_pedido',
     'id_producto',
@@ -21,4 +23,13 @@ class DetallePedidos extends Model
   protected $guarded = [
 
   ]; 
+  
+  public function pedido(){
+    return $this->belongsTo(Pedidos::class, 'id_pedido');
+  }
+
+  public function producto() {
+    return $this->belongsTo(Producto::class,'id_producto');
+  }
+
 }

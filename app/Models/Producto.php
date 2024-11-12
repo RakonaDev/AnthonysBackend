@@ -24,4 +24,8 @@ class Producto extends Model
     
   ];
 
+  public function detallesPedidos() {
+    return $this->hasMany(DetallePedidos::class, 'id_detalle');
+  }
+
 }

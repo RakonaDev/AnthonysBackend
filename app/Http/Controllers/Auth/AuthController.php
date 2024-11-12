@@ -75,13 +75,13 @@ class AuthController extends Controller
   // Método para cerrar sesión
   public function logout()
   {
-      auth()->logout();
-      return response()->json(['message' => 'Sesión cerrada con éxito']);
+    auth()->logout();
+    return response()->json(['message' => 'Sesión cerrada con éxito']);
   }
 
   // Método para obtener el usuario autenticado
   public function me()
   {
-      return response()->json(auth()->user());
+    return response()->json(auth()->user(), 200);
   }
 }

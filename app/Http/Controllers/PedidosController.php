@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\DetallePedidos;
 use App\Models\Pedidos;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Tymon\JWTAuth\Facades\JWTAuth;
 
@@ -12,8 +14,8 @@ class PedidosController extends Controller
 {
   
   public function index() {
-    $pedidos = Pedidos::all();
-
+    $pedidos = Pedidos::with('detalle.producto')->get();
+    
     if($pedidos->isEmpty()){
       $reponse = [
         'mensaje' => 'No hay pedidos',
@@ -33,33 +35,62 @@ class PedidosController extends Controller
 
   public function store (Request $request) {
     $validacion = Validator::make($request->all(), [
-      'id_usuario' => 'required|numeric',
       'total' => 'required|numeric',
       'direccion' => 'required|string',
+      'detalle_pedido' => 'required|array',
+      'detalle_pedido.*.id_producto' => 'required|exists:producto.id_producto',
+      'detalle_pedido.*.cantidad' => 'required|numeric|min:1',
+      'detalle_pedido.*.precio' => 'required|numeric|min:0',
+      'detalle_pedido.*.subtotal' => 'required|numeric'
     ]);
 
     if($validacion->fails()){
       $reponse = [
         'error' => $validacion->errors(),
-        'status' => 400
+        'status' => 422
       ];
-      return response()->json($reponse, 400);
+      return response()->json($reponse, 422);
     }
-    
-    $pedidoCreado = Pedidos::create([
-      'id_usuario'=> $request->id_usuario,
-      'total'=> $request->total,
-      'direccion' => $request->direccion,
-      'estado'=> 'Pendiente',
-    ]);
 
-    $reponse = [
-      'mensaje' => 'Pedido Creado Correctamente',
-      'pedido' => $pedidoCreado,
-      'status' => 200
-    ];
+    $user = JWTAuth::parseToken()->authenticate();
 
-    return response()->json($reponse, 200);
+    DB::beginTransaction();
+
+    try{
+
+      $pedido = Pedidos::create([
+        'id_usuario'=> $user->id_usuario,
+        'total' => $request->total,
+        'direccion' => $request->direccion,
+        'status' => 'Pendiente'
+      ]);
+
+      foreach ($request->detalle_pedido as $detalle) {
+        DetallePedidos::create([
+          'id_pedido' => $pedido->id_pedido,
+          'id_producto' => $detalle['id_producto'],
+          'cantidad' => $detalle['cantidad'],
+          'subtotal' => $detalle['subtotal']
+        ]);
+      }
+
+      DB::commit();
+
+      $reponse = [
+        'mensaje' => 'Pedido Creado',
+        'pedido' => $pedido,
+        'status' => 200
+      ];
+
+    } catch (\Exception $e) {
+      DB::rollBack();
+      $response = [
+        'mensaje' => 'Hubo un error al crear el pedido',
+        'error' => $e->getMessage(),
+        'status' => 500
+      ];
+      return response()->json($response, 500);
+    }
   }
 
   public function show($id_pedido) {
@@ -206,11 +237,10 @@ class PedidosController extends Controller
     }
   }
 
-  public function getOrderByUser ($id_usuario) {
-    $usuario = User::find($id_usuario);
+  public function getOrderByUser () {
     $usuarioAuth = JWTAuth::parseToken()->authenticate();
 
-    if($usuario == null){
+    if($usuarioAuth == null){
       $reponse = [
         'mensaje' => 'Ese usuario no existe',
         'status' => 404
@@ -219,13 +249,11 @@ class PedidosController extends Controller
       return response()->json($reponse, 404);
     }
 
-    $pedidos = Pedidos::with('users')->where('id_usuario','=' ,$id_usuario)->get();
-
+    $pedidos = $usuarioAuth->pedidos()->with('detalle')->get();
     if($pedidos->isEmpty()){
       $reponse = [
         'mensaje' => 'No hay pedidos',
         'pedidos' => $pedidos,
-        'usuario' => $usuarioAuth,
         'status' => 200
       ];
       return response()->json($reponse, 200);
