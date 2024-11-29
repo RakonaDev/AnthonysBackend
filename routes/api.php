@@ -24,19 +24,18 @@ use App\Http\Controllers\CategoriaController;
 Route::middleware('throttle:30,1')->group(function () {
   Route::get('/productos', [ProductoController::class, 'index']);
 
-  Route::get('/productos/{id_producto}', [ProductoController::class,'show']);
+  Route::get('/productos/{id_producto}', [ProductoController::class, 'show']);
 });
 
 Route::middleware('auth:admin')->group(function () {
 
   Route::post('/productos', [ProductoController::class, 'store']);
 
-  Route::put('/productos/{id_producto}', [ProductoController::class,'update']);
+  Route::put('/productos/{id_producto}', [ProductoController::class, 'update']);
 
-  Route::patch('/productos/{id_producto}', [ProductoController::class,'edit']);
+  Route::patch('/productos/{id_producto}', [ProductoController::class, 'edit']);
 
-  Route::delete('/productos/{id_producto}',[ProductoController::class,'destroy']);
-
+  Route::delete('/productos/{id_producto}', [ProductoController::class, 'destroy']);
 });
 
 
@@ -47,24 +46,33 @@ Route::middleware('auth:admin')->group(function () {
 
 Route::middleware('auth:api')->group(function () {
   Route::get('/pedidos/usuario', [PedidosController::class, 'getOrderByUser']);
+  Route::post('/pedidos', [PedidosController::class, 'store']);
 });
 
-    Route::get('/{id_categoria}', [CategoriaController::class, 'show']);
+Route::get('/categorias', [CategoriaController::class, 'index']);
 
-    Route::post('/', [CategoriaController::class, 'store']);
+Route::get('/categorias/{id_categoria}', [CategoriaController::class, 'show']);
 
-    Route::put('/{id_categoria}', [CategoriaController::class, 'update']);
+Route::middleware('auth:admin')->group(function () {
+  Route::post('/categorias', [CategoriaController::class, 'store']);
 
-    Route::patch('/{id_categoria}', [CategoriaController::class, 'edit']);
+  Route::put('/categorias/{id_categoria}', [CategoriaController::class, 'update']);
+
+  Route::patch('/categorias/{id_categoria}', [CategoriaController::class, 'edit']);
+});
+
+Route::post('/register', [AuthController::class, 'register']);
+Route::post('/login', [AuthController::class, 'login']);
 
 Route::middleware('auth:api')->group(function () {
   Route::post('/logout', [AuthController::class, 'logout']);
   Route::get('/me', [AuthController::class, 'me']);
 });
 
-Route::post('/adminLogin', [AdminController::class,'login']);
+Route::post('/admin/register', [AdminController::class, 'register']);
+Route::post('/admin/login', [AdminController::class, 'login']);
 
 Route::middleware('auth:admin')->group(function () {
   Route::get('/admin/me', [AdminController::class, 'me']);
-  Route::post('/admin/logout', [AdminController::class, 'logout']); 
+  Route::post('/admin/logout', [AdminController::class, 'logout']);
 });

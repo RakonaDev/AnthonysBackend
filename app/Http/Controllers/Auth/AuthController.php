@@ -39,8 +39,6 @@ class AuthController extends Controller
     ]);
 
     $token = JWTAuth::fromUser($user);
-
-    $user->remember_token = $token;
     $user->save();
 
     $reponse = [

@@ -38,7 +38,7 @@ class PedidosController extends Controller
       'total' => 'required|numeric',
       'direccion' => 'required|string',
       'detalle_pedido' => 'required|array',
-      'detalle_pedido.*.id_producto' => 'required|exists:producto.id_producto',
+      'detalle_pedido.*.id_producto' => 'required|exists:producto,id_producto',
       'detalle_pedido.*.cantidad' => 'required|numeric|min:1',
       'detalle_pedido.*.precio' => 'required|numeric|min:0',
       'detalle_pedido.*.subtotal' => 'required|numeric'
@@ -62,7 +62,7 @@ class PedidosController extends Controller
         'id_usuario'=> $user->id_usuario,
         'total' => $request->total,
         'direccion' => $request->direccion,
-        'status' => 'Pendiente'
+        'estado' => 'Pendiente'
       ]);
 
       foreach ($request->detalle_pedido as $detalle) {

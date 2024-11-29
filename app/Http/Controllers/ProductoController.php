@@ -4,16 +4,18 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Producto;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 
 class ProductoController extends Controller
 {
   // Muestra todos los productos
-  public function index(){ 
-    
-    $productos = Producto::all();
+  public function index()
+  {
 
-    if($productos->isEmpty()){
+    $productos = Producto::all(['id_producto', 'nombre', 'descripcion', 'url_imagen', 'id_categoria', 'precio']);
+
+    if ($productos->isEmpty()) {
       $reponse = [
         "mensaje" => "No se han encontrado productos",
         "productos" => $productos,
@@ -22,37 +24,42 @@ class ProductoController extends Controller
       return response()->json($reponse, 200);
     }
 
+    foreach ($productos as &$producto) {
+      $producto['url_imagen'] = 'http://127.0.0.1:8000/storage/' . $producto['url_imagen'];
+    }
+
     $response = [
       "productos" => $productos,
       "status" => 200
     ];
-    return response()->json($response , 200);
+    return response()->json($response, 200);
   }
 
   // Guarda el producto a la base de datos
-  public function store (Request $request) {
+  public function store(Request $request)
+  {
     $validacion = Validator::make($request->all(), [
       'nombre' => 'required|string|unique:producto,nombre',
       'precio' => 'required|numeric',
-      'descripción' => 'required|string',
+      'descripcion' => 'required|string',
       'id_categoria' => 'required|numeric',
       'imagen' => 'required|image|mimes:jpeg,png,jpg,gif|max:5048'
     ]);
 
-    if($validacion->fails()){
+    if ($validacion->fails()) {
       $reponse = [
         'error' => $validacion->errors(),
         'status' => 400
       ];
       return response()->json($reponse, 400);
     }
-    
+
     $productoCreado = Producto::create([
-      'nombre'=> strtolower($request->nombre),
-      'descripción'=> $request->descripción,
+      'nombre' => ucwords(strtolower($request->nombre)),
+      'descripcion' => $request->descripcion,
       'precio' => $request->precio,
-      'url_imagen'=> '',
-      'id_categoria'=> $request->id_categoria,
+      'url_imagen' => '',
+      'id_categoria' => $request->id_categoria,
     ]);
 
     // Crear la imagen del producto
@@ -69,16 +76,17 @@ class ProductoController extends Controller
     $reponse = [
       'mensaje' => 'Producto Creado Correctamente',
       'producto' => $productoCreado,
-      'status'=> 200
+      'status' => 200
     ];
     return response()->json($reponse, 200);
   }
 
   // Busca producto por ID
-  public function show($id_producto) {
+  public function show($id_producto)
+  {
     $producto = Producto::find($id_producto);
 
-    if($producto == null){
+    if ($producto == null) {
       $reponse = [
         'mensaje' => 'No se ha encontrado el producto',
         'producto' => $producto,
@@ -90,32 +98,35 @@ class ProductoController extends Controller
 
     $response = [
       'producto' => $producto,
-      'status'=> 200
+      'status' => 200
     ];
 
     return response()->json($response, 200);
   }
 
   // Editar uno o más parametros del producto seleccionado
-  public function edit(Request $request , $id_producto) {
+  public function edit(Request $request, $id_producto)
+  {
     $producto = Producto::find($id_producto);
-    if($producto == null){
+    if ($producto == null) {
       $reponse = [
         'mensaje' => 'Producto no encontrado',
-        'status'=> 404
+        'status' => 404
       ];
       return response()->json($reponse, 404);
     }
+    Log::info('Datos recibidos:', $request->all());
+    Log::info('Encabezados:', $request->headers->all());
 
     $validado = Validator::make($request->all(), [
-      'nombre' => 'string',
-      'descripción' => 'string',
+      'nombre' => 'string|required',
+      'descripcion' => 'string',
       'precio' => 'numeric',
-      'url_imagen' => 'string',
+      'imagen' => 'image|mimes:jpeg,png,jpg,gif|max:5048',
       'id_categoria' => 'numeric'
     ]);
 
-    if($validado->fails()) {
+    if ($validado->fails()) {
       $reponse = [
         'errors' => $validado->errors(),
         'status' => 400
@@ -123,35 +134,39 @@ class ProductoController extends Controller
       return response()->json($reponse, 400);
     }
 
-    if($request->nombre != null){
-      $producto->nombre = $request->nombre;
+    if ($request->has('nombre')) {
+      $producto['nombre'] = $request->nombre;
     }
 
-    if($request->precio != null){
+    if ($request->has('precio')) {
       $producto->precio = $request->precio;
     }
 
-    if($request->descripción != null){
-      $producto->descripción = $request->descripción;
+    if ($request->has('descripcion')) {
+      $producto->descripcion = $request->descripcion;
     }
 
-    if($request->url_imagen != null){
-      $producto->url_imagen = $request->url_imagen;
+    if ($request->hasFile('imagen')) {
+      $image = $request->file('imagen');
+      $imageName = $producto->id_producto . '.' . $image->getClientOriginalExtension();
+      $image->storeAs('img/productos', $imageName, 'public');
+      $producto->imagen = $imageName; // Asegúrate de tener un campo `imagen` en la tabla
     }
 
-    if($request->id_categoria != null){
+    if ($request->has('id_categoria')) {
       $producto->id_categoria = $request->id_categoria;
     }
+    var_dump($producto);
     
-    if ($producto->save()){
+    if ($producto->saveQuietly()) {
       $response = [
         'mensaje' => 'Producto actualizado correctamente',
-        'producto' => $producto,
+        'producto' => $producto->fresh(),
         'status' => 200
       ];
-      return response()->json($response, 200);      
+      return response()->json($response, 200);
     }
-    
+
     $response = [
       'mensaje' => 'Hubo un error con la funcion',
       'status' => 501
@@ -160,19 +175,20 @@ class ProductoController extends Controller
   }
 
   // Editar por completo el producto seleccionado
-  public function update (Request $request, $id_producto) {
+  public function update(Request $request, $id_producto)
+  {
     $producto = Producto::find($id_producto);
 
-    if($producto == null){
+    if ($producto == null) {
       $response = [
         'mensaje' => 'Producto no encontrado',
-        'status'=> 404
+        'status' => 404
       ];
 
       return response()->json($response, 404);
     }
 
-    $esValido = Validator::make($request->all(),[
+    $esValido = Validator::make($request->all(), [
       'nombre' => 'required|string|unique:producto,nombre',
       'descripción' => 'required|string|unique:producto,descripción',
       'precio' => 'required|numeric',
@@ -180,7 +196,7 @@ class ProductoController extends Controller
       'url_imagen' => 'required|string|unique:producto,url_imagen'
     ]);
 
-    if($esValido->fails()){
+    if ($esValido->fails()) {
       $response = [
         'mensaje' => 'No se pudo actualizar el producto',
         'errors' => $esValido->errors(),
@@ -189,7 +205,7 @@ class ProductoController extends Controller
       return response()->json($response, 400);
     }
 
-    $producto->update( $request->all());
+    $producto->update($request->all());
 
     $productoActualizado = [
       'id_producto' => $producto->id_producto,
@@ -203,27 +219,27 @@ class ProductoController extends Controller
     $reponse = [
       'mensaje' => 'Producto actualizado correctamente',
       'producto' => $productoActualizado,
-      'status'=> 200
+      'status' => 200
     ];
     return response()->json($reponse, 200);
   }
 
   // Eliminar producto de la base de datos
-  public function destroy ($id_producto) {
+  public function destroy($id_producto)
+  {
     $producto = Producto::find($id_producto);
-    if($producto == null){
+    if ($producto == null) {
       $response = [
         'mensaje' => 'Producto no encontrado.',
         'status' => 404
       ];
       return response()->json($response, 404);
-    }
-    else{
+    } else {
       $producto->delete();
 
       $response = [
         'mensaje' => 'Producto eliminado correctamente',
-        'status'=> 200
+        'status' => 200
       ];
       return response()->json($response, 200);
     }
